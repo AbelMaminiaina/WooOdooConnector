@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  # WooCommerce-Odoo Connector API
+  connector:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: woo-odoo-connector
+    ports:
+      - "${API_PORT:-8000}:8000"
+    environment:
+      # WooCommerce
+      - WOO_URL=${WOO_URL}
+      - WOO_CONSUMER_KEY=${WOO_CONSUMER_KEY}
+      - WOO_CONSUMER_SECRET=${WOO_CONSUMER_SECRET}
+
+      # Odoo
+      - ODOO_URL=${ODOO_URL}
+      - ODOO_DB=${ODOO_DB}
+      - ODOO_USERNAME=${ODOO_USERNAME}
+      - ODOO_PASSWORD=${ODOO_PASSWORD}
+
+      # Database
+      - DATABASE_URL=postgresql://connector:connector123@db:5432/woo_odoo_connector
+
+      # API
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - API_SECRET_KEY=${API_SECRET_KEY}
+
+      # Sync
+      - SYNC_ENABLED=${SYNC_ENABLED:-true}
+      - SYNC_INTERVAL_MINUTES=${SYNC_INTERVAL_MINUTES:-15}
+
+      # Logging
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+
+    volumes:
+      - ./logs:/app/logs
+      - ./src:/app/src  # For development - remove in production
+
+    depends_on:
+      - db
+
+    restart: unless-stopped
+
+    networks:
+      - connector-network
+
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: woo-odoo-db
+    environment:
+      - POSTGRES_DB=woo_odoo_connector
+      - POSTGRES_USER=connector
+      - POSTGRES_PASSWORD=connector123
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    ports:
+      - "5432:5432"
+
+    restart: unless-stopped
+
+    networks:
+      - connector-network
+
+  # Optional: Scheduler for automatic syncs
+  # scheduler:
+  #   build:
+  #     context: .
+  #     dockerfile: docker/Dockerfile
+  #   container_name: woo-odoo-scheduler
+  #   command: python -m connector.scheduler
+  #   environment:
+  #     # Same environment as connector
+  #   depends_on:
+  #     - connector
+  #     - db
+  #   restart: unless-stopped
+  #   networks:
+  #     - connector-network
+
+volumes:
+  postgres_data:
+
+networks:
+  connector-network:
+    driver: bridge
