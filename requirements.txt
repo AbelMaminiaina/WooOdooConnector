@@ -14,7 +14,7 @@ apscheduler==3.10.4
 # Database
 sqlalchemy==2.0.25
 alembic==1.13.1
-psycopg2-binary==2.9.9
+psycopg2-binary==2.9.11
 
 # Security
 python-dotenv==1.0.0
