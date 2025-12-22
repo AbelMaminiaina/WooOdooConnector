@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
@@ -22,11 +23,24 @@ logger.add(
 )
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan events"""
+    # Startup
+    logger.info("Starting WooCommerce <-> Odoo Connector API")
+    logger.info(f"WooCommerce URL: {settings.woo_url}")
+    logger.info(f"Odoo URL: {settings.odoo_url}")
+    yield
+    # Shutdown
+    logger.info("Shutting down WooCommerce <-> Odoo Connector API")
+
+
 # Create FastAPI application
 app = FastAPI(
     title="WooCommerce <-> Odoo Connector",
     description="API for synchronizing data between WooCommerce and Odoo",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 # CORS middleware
@@ -37,20 +51,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.on_event("startup")
-async def startup_event():
-    """Application startup"""
-    logger.info("Starting WooCommerce <-> Odoo Connector API")
-    logger.info(f"WooCommerce URL: {settings.woo_url}")
-    logger.info(f"Odoo URL: {settings.odoo_url}")
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Application shutdown"""
-    logger.info("Shutting down WooCommerce <-> Odoo Connector API")
 
 
 @app.get("/")

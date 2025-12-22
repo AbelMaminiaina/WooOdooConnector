@@ -3,11 +3,12 @@ Tests for API endpoints
 """
 
 import pytest
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 
 import sys
 import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from connector.api.main import app
 
@@ -15,7 +16,9 @@ from connector.api.main import app
 @pytest.mark.asyncio
 async def test_root_endpoint():
     """Test root endpoint"""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as client:
         response = await client.get("/")
 
     assert response.status_code == 200
@@ -27,7 +30,9 @@ async def test_root_endpoint():
 @pytest.mark.asyncio
 async def test_health_endpoint():
     """Test health check endpoint"""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as client:
         response = await client.get("/health")
 
     assert response.status_code == 200
@@ -38,7 +43,9 @@ async def test_health_endpoint():
 @pytest.mark.asyncio
 async def test_sync_status_endpoint():
     """Test sync status endpoint"""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as client:
         response = await client.get("/sync/status")
 
     assert response.status_code == 200
@@ -51,7 +58,9 @@ async def test_sync_status_endpoint():
 @pytest.mark.asyncio
 async def test_webhook_test_endpoint():
     """Test webhook test endpoint"""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as client:
         response = await client.get("/webhooks/test")
 
     assert response.status_code == 200
