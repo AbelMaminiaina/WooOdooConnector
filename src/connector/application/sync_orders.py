@@ -24,7 +24,7 @@ class SyncOrdersUseCase:
         self,
         status: Optional[str] = None,
         since: Optional[datetime] = None,
-        limit: Optional[int] = None
+        limit: Optional[int] = None,
     ) -> dict:
         """Sync orders from WooCommerce to Odoo
 
@@ -38,12 +38,7 @@ class SyncOrdersUseCase:
         """
         logger.info("Starting order synchronization from WooCommerce to Odoo")
 
-        results = {
-            "total": 0,
-            "success": 0,
-            "failed": 0,
-            "errors": []
-        }
+        results = {"total": 0, "success": 0, "failed": 0, "errors": []}
 
         try:
             # Get orders from WooCommerce
@@ -77,10 +72,7 @@ class SyncOrdersUseCase:
             raise
 
     async def _fetch_woocommerce_orders(
-        self,
-        status: Optional[str],
-        since: Optional[datetime],
-        limit: Optional[int]
+        self, status: Optional[str], since: Optional[datetime], limit: Optional[int]
     ) -> List[dict]:
         """Fetch orders from WooCommerce
 
@@ -100,10 +92,7 @@ class SyncOrdersUseCase:
 
         while True:
             batch = await self.woo_client.get_orders(
-                status=status,
-                per_page=per_page,
-                page=page,
-                after=after
+                status=status, per_page=per_page, page=page, after=after
             )
 
             if not batch:
@@ -137,7 +126,9 @@ class SyncOrdersUseCase:
         existing = await self._find_existing_order(order.external_id)
 
         if existing:
-            logger.info(f"Order {order.external_id} already exists in Odoo (ID: {existing})")
+            logger.info(
+                f"Order {order.external_id} already exists in Odoo (ID: {existing})"
+            )
             # Optionally update the order
             # await self._update_order_in_odoo(existing, order)
             return existing
@@ -166,9 +157,7 @@ class SyncOrdersUseCase:
         # Search for order with matching external reference
         # You might use a custom field like 'x_woocommerce_id' to store the external ID
         orders = await self.odoo_client.search(
-            "sale.order",
-            domain=[["x_woocommerce_id", "=", external_id]],
-            limit=1
+            "sale.order", domain=[["x_woocommerce_id", "=", external_id]], limit=1
         )
 
         return orders[0] if orders else None
@@ -184,9 +173,7 @@ class SyncOrdersUseCase:
         """
         # Search for existing partner by email
         partners = await self.odoo_client.search(
-            "res.partner",
-            domain=[["email", "=", order.customer_email]],
-            limit=1
+            "res.partner", domain=[["email", "=", order.customer_email]], limit=1
         )
 
         if partners:
@@ -223,9 +210,7 @@ class SyncOrdersUseCase:
             return None
 
         countries = await self.odoo_client.search(
-            "res.country",
-            domain=[["code", "=", country_code]],
-            limit=1
+            "res.country", domain=[["code", "=", country_code]], limit=1
         )
 
         return countries[0] if countries else None
@@ -247,11 +232,15 @@ class SyncOrdersUseCase:
             product_id = await self._find_product_by_sku(line.sku) if line.sku else None
 
             if product_id:
-                order_line = (0, 0, {
-                    "product_id": product_id,
-                    "product_uom_qty": line.quantity,
-                    "price_unit": float(line.unit_price),
-                })
+                order_line = (
+                    0,
+                    0,
+                    {
+                        "product_id": product_id,
+                        "product_uom_qty": line.quantity,
+                        "price_unit": float(line.unit_price),
+                    },
+                )
                 order_lines.append(order_line)
             else:
                 logger.warning(f"Product not found for SKU {line.sku}, skipping line")
@@ -279,9 +268,7 @@ class SyncOrdersUseCase:
             Odoo product ID or None
         """
         products = await self.odoo_client.search(
-            "product.product",
-            domain=[["default_code", "=", sku]],
-            limit=1
+            "product.product", domain=[["default_code", "=", sku]], limit=1
         )
 
         return products[0] if products else None

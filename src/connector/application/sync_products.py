@@ -30,13 +30,7 @@ class SyncProductsUseCase:
         """
         logger.info("Starting product sync from Odoo to WooCommerce")
 
-        results = {
-            "total": 0,
-            "created": 0,
-            "updated": 0,
-            "failed": 0,
-            "errors": []
-        }
+        results = {"total": 0, "created": 0, "updated": 0, "failed": 0, "errors": []}
 
         try:
             # Get products from Odoo
@@ -61,8 +55,7 @@ class SyncProductsUseCase:
                         # Update existing product
                         woo_id = woo_products[0]["id"]
                         await self.woo_client.update_product(
-                            woo_id,
-                            product.to_woocommerce_values()
+                            woo_id, product.to_woocommerce_values()
                         )
                         results["updated"] += 1
                         logger.info(f"Updated product {sku} in WooCommerce")
@@ -99,13 +92,7 @@ class SyncProductsUseCase:
         """
         logger.info("Starting product sync from WooCommerce to Odoo")
 
-        results = {
-            "total": 0,
-            "created": 0,
-            "updated": 0,
-            "failed": 0,
-            "errors": []
-        }
+        results = {"total": 0, "created": 0, "updated": 0, "failed": 0, "errors": []}
 
         try:
             # Get products from WooCommerce
@@ -125,25 +112,20 @@ class SyncProductsUseCase:
 
                     # Check if product exists in Odoo
                     odoo_products = await self.odoo_client.search(
-                        "product.product",
-                        domain=[["default_code", "=", sku]],
-                        limit=1
+                        "product.product", domain=[["default_code", "=", sku]], limit=1
                     )
 
                     if odoo_products:
                         # Update existing product
                         await self.odoo_client.write(
-                            "product.product",
-                            odoo_products,
-                            product.to_odoo_values()
+                            "product.product", odoo_products, product.to_odoo_values()
                         )
                         results["updated"] += 1
                         logger.info(f"Updated product {sku} in Odoo")
                     else:
                         # Create new product
                         odoo_id = await self.odoo_client.create(
-                            "product.product",
-                            product.to_odoo_values()
+                            "product.product", product.to_odoo_values()
                         )
                         results["created"] += 1
                         logger.info(f"Created product {sku} in Odoo (ID: {odoo_id})")
@@ -179,10 +161,7 @@ class SyncProductsUseCase:
         per_page = 100
 
         while True:
-            batch = await self.woo_client.get_products(
-                per_page=per_page,
-                page=page
-            )
+            batch = await self.woo_client.get_products(per_page=per_page, page=page)
 
             if not batch:
                 break
@@ -213,7 +192,7 @@ class SyncProductsUseCase:
             "product.product",
             domain=[["sale_ok", "=", True]],  # Only products that can be sold
             fields=["name", "default_code", "list_price", "qty_available", "weight"],
-            limit=limit
+            limit=limit,
         )
 
         return products

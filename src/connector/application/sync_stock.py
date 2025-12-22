@@ -29,12 +29,7 @@ class SyncStockUseCase:
         """
         logger.info("Starting stock synchronization from Odoo to WooCommerce")
 
-        results = {
-            "total": 0,
-            "success": 0,
-            "failed": 0,
-            "errors": []
-        }
+        results = {"total": 0, "success": 0, "failed": 0, "errors": []}
 
         try:
             if sku:
@@ -64,11 +59,8 @@ class SyncStockUseCase:
         # Get all products from Odoo with stock info
         products = await self.odoo_client.search_read(
             "product.product",
-            domain=[
-                ["sale_ok", "=", True],
-                ["default_code", "!=", False]  # Has SKU
-            ],
-            fields=["default_code", "qty_available"]
+            domain=[["sale_ok", "=", True], ["default_code", "!=", False]],  # Has SKU
+            fields=["default_code", "qty_available"],
         )
 
         results["total"] = len(products)
@@ -102,7 +94,7 @@ class SyncStockUseCase:
             "product.product",
             domain=[["default_code", "=", sku]],
             fields=["qty_available"],
-            limit=1
+            limit=1,
         )
 
         if not products:
@@ -144,4 +136,6 @@ class SyncStockUseCase:
         # Update stock
         await self.woo_client.update_product_stock(product_id, quantity)
 
-        logger.info(f"Updated WooCommerce product {product_id} ({sku}) stock to {quantity}")
+        logger.info(
+            f"Updated WooCommerce product {product_id} ({sku}) stock to {quantity}"
+        )

@@ -17,14 +17,14 @@ def get_clients():
     woo_client = WooCommerceClient(
         url=settings.woo_url,
         consumer_key=settings.woo_consumer_key,
-        consumer_secret=settings.woo_consumer_secret
+        consumer_secret=settings.woo_consumer_secret,
     )
 
     odoo_client = OdooClient(
         url=settings.odoo_url,
         db=settings.odoo_db,
         username=settings.odoo_username,
-        password=settings.odoo_password
+        password=settings.odoo_password,
     )
 
     return woo_client, odoo_client
@@ -32,8 +32,7 @@ def get_clients():
 
 @router.post("/woocommerce/order")
 async def woocommerce_order_webhook(
-    request: Request,
-    x_wc_webhook_topic: Optional[str] = Header(None)
+    request: Request, x_wc_webhook_topic: Optional[str] = Header(None)
 ):
     """Handle WooCommerce order webhooks
 
@@ -49,7 +48,9 @@ async def woocommerce_order_webhook(
         payload = await request.json()
         order_id = payload.get("id")
 
-        logger.info(f"Received WooCommerce webhook: {x_wc_webhook_topic} for order {order_id}")
+        logger.info(
+            f"Received WooCommerce webhook: {x_wc_webhook_topic} for order {order_id}"
+        )
 
         # Handle different webhook topics
         if x_wc_webhook_topic in ["order.created", "order.updated"]:
@@ -66,18 +67,12 @@ async def woocommerce_order_webhook(
 
             logger.info(f"Successfully processed order webhook for order {order_id}")
 
-            return {
-                "success": True,
-                "message": f"Order {order_id} synced to Odoo"
-            }
+            return {"success": True, "message": f"Order {order_id} synced to Odoo"}
 
         elif x_wc_webhook_topic == "order.deleted":
             logger.info(f"Order {order_id} deleted in WooCommerce")
             # Handle order deletion if needed
-            return {
-                "success": True,
-                "message": f"Order {order_id} deletion noted"
-            }
+            return {"success": True, "message": f"Order {order_id} deletion noted"}
 
         return {"success": True, "message": "Webhook received"}
 
@@ -88,8 +83,7 @@ async def woocommerce_order_webhook(
 
 @router.post("/woocommerce/product")
 async def woocommerce_product_webhook(
-    request: Request,
-    x_wc_webhook_topic: Optional[str] = Header(None)
+    request: Request, x_wc_webhook_topic: Optional[str] = Header(None)
 ):
     """Handle WooCommerce product webhooks
 
@@ -102,14 +96,16 @@ async def woocommerce_product_webhook(
         payload = await request.json()
         product_id = payload.get("id")
 
-        logger.info(f"Received WooCommerce webhook: {x_wc_webhook_topic} for product {product_id}")
+        logger.info(
+            f"Received WooCommerce webhook: {x_wc_webhook_topic} for product {product_id}"
+        )
 
         # Here you would implement product sync logic
         # Similar to order webhooks
 
         return {
             "success": True,
-            "message": f"Product webhook received for product {product_id}"
+            "message": f"Product webhook received for product {product_id}",
         }
 
     except Exception as e:
@@ -144,7 +140,7 @@ async def odoo_stock_webhook(request: Request):
         return {
             "success": True,
             "message": f"Stock updated for SKU {sku}",
-            "results": results
+            "results": results,
         }
 
     except Exception as e:
@@ -155,7 +151,4 @@ async def odoo_stock_webhook(request: Request):
 @router.get("/test")
 async def test_webhook():
     """Test endpoint to verify webhooks are working"""
-    return {
-        "status": "ok",
-        "message": "Webhook endpoint is working"
-    }
+    return {"status": "ok", "message": "Webhook endpoint is working"}

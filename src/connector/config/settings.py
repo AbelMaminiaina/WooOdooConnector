@@ -1,4 +1,4 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional
 
 
@@ -6,23 +6,20 @@ class Settings(BaseSettings):
     """Application configuration settings"""
 
     # WooCommerce
-    woo_url: str
-    woo_consumer_key: str
-    woo_consumer_secret: str
+    woo_url: str = "http://localhost:8080"
+    woo_consumer_key: str = "test_key"
+    woo_consumer_secret: str = "test_secret"
 
     # Odoo
-    odoo_url: str
-    odoo_db: str
-    odoo_username: str
-    odoo_password: str
-
-    # Database
-    database_url: str = "sqlite:///./woo_odoo.db"
+    odoo_url: str = "http://localhost:8069"
+    odoo_db: str = "test_db"
+    odoo_username: str = "admin"
+    odoo_password: str = "admin"
 
     # API
     api_host: str = "0.0.0.0"
     api_port: int = 8000
-    api_secret_key: str
+    api_secret_key: str = "dev-secret-key-change-in-production"
 
     # Sync
     sync_enabled: bool = True
@@ -31,9 +28,11 @@ class Settings(BaseSettings):
     # Logging
     log_level: str = "INFO"
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=False,
+        extra="ignore",
+    )
 
 
 # Singleton instance

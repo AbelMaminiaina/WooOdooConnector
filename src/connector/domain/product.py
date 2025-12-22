@@ -59,7 +59,11 @@ class Product:
             sku=woo_product.get("sku"),
             description=woo_product.get("description"),
             price=Decimal(str(woo_product.get("price", 0))),
-            sale_price=Decimal(str(woo_product["sale_price"])) if woo_product.get("sale_price") else None,
+            sale_price=(
+                Decimal(str(woo_product["sale_price"]))
+                if woo_product.get("sale_price")
+                else None
+            ),
             regular_price=Decimal(str(woo_product.get("regular_price", 0))),
             stock_quantity=woo_product.get("stock_quantity"),
             manage_stock=woo_product.get("manage_stock", False),
@@ -67,7 +71,7 @@ class Product:
             type=woo_product.get("type", "simple"),
             status=woo_product.get("status", "publish"),
             weight=woo_product.get("weight"),
-            categories=[cat.get("name") for cat in woo_product.get("categories", [])]
+            categories=[cat.get("name") for cat in woo_product.get("categories", [])],
         )
 
     @classmethod
@@ -89,9 +93,13 @@ class Product:
             price=Decimal(str(odoo_product.get("list_price", 0))),
             stock_quantity=int(odoo_product.get("qty_available", 0)),
             manage_stock=True,
-            stock_status="instock" if odoo_product.get("qty_available", 0) > 0 else "outofstock",
+            stock_status=(
+                "instock" if odoo_product.get("qty_available", 0) > 0 else "outofstock"
+            ),
             type="simple",
-            weight=str(odoo_product.get("weight")) if odoo_product.get("weight") else None
+            weight=(
+                str(odoo_product.get("weight")) if odoo_product.get("weight") else None
+            ),
         )
 
     def to_odoo_values(self) -> dict:
@@ -130,7 +138,7 @@ class Product:
             "manage_stock": self.manage_stock,
             "stock_status": self.stock_status,
             "type": self.type,
-            "status": self.status
+            "status": self.status,
         }
 
         if self.stock_quantity is not None:

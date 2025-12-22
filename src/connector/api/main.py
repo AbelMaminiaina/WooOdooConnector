@@ -12,13 +12,13 @@ logger.remove()
 logger.add(
     sys.stdout,
     format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan> - <level>{message}</level>",
-    level=settings.log_level
+    level=settings.log_level,
 )
 logger.add(
     "logs/connector.log",
     rotation="500 MB",
     retention="10 days",
-    level=settings.log_level
+    level=settings.log_level,
 )
 
 
@@ -26,7 +26,7 @@ logger.add(
 app = FastAPI(
     title="WooCommerce <-> Odoo Connector",
     description="API for synchronizing data between WooCommerce and Odoo",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 # CORS middleware
@@ -59,7 +59,7 @@ async def root():
     return {
         "name": "WooCommerce <-> Odoo Connector",
         "version": "1.0.0",
-        "status": "running"
+        "status": "running",
     }
 
 
@@ -81,5 +81,5 @@ if __name__ == "__main__":
         "connector.api.main:app",
         host=settings.api_host,
         port=settings.api_port,
-        reload=True
+        reload=True,
     )

@@ -20,7 +20,7 @@ class OdooClient:
             username: Odoo username
             password: Odoo password
         """
-        self.url = url.rstrip('/')
+        self.url = url.rstrip("/")
         self.db = db
         self.username = username
         self.password = password
@@ -40,14 +40,16 @@ class OdooClient:
             response = await self._call(
                 service="common",
                 method="login",
-                args=[self.db, self.username, self.password]
+                args=[self.db, self.username, self.password],
             )
 
             if not response:
                 raise Exception("Authentication failed: Invalid credentials")
 
             self.uid = response
-            logger.info(f"Authenticated with Odoo as user {self.username} (uid: {self.uid})")
+            logger.info(
+                f"Authenticated with Odoo as user {self.username} (uid: {self.uid})"
+            )
             return self.uid
 
         except Exception as e:
@@ -71,7 +73,9 @@ class OdooClient:
         logger.info(f"Created {model} with ID {result}")
         return result
 
-    async def write(self, model: str, record_ids: List[int], values: Dict[str, Any]) -> bool:
+    async def write(
+        self, model: str, record_ids: List[int], values: Dict[str, Any]
+    ) -> bool:
         """Update record(s) in Odoo
 
         Args:
@@ -95,7 +99,7 @@ class OdooClient:
         domain: List = None,
         fields: List[str] = None,
         limit: int = None,
-        offset: int = 0
+        offset: int = 0,
     ) -> List[Dict[str, Any]]:
         """Search and read records from Odoo
 
@@ -119,17 +123,14 @@ class OdooClient:
         if limit:
             kwargs["limit"] = limit
 
-        result = await self._execute(
-            model,
-            "search_read",
-            [domain],
-            kwargs
-        )
+        result = await self._execute(model, "search_read", [domain], kwargs)
 
         logger.info(f"Found {len(result)} {model} records")
         return result
 
-    async def search(self, model: str, domain: List = None, limit: int = None) -> List[int]:
+    async def search(
+        self, model: str, domain: List = None, limit: int = None
+    ) -> List[int]:
         """Search for record IDs in Odoo
 
         Args:
@@ -154,11 +155,7 @@ class OdooClient:
         return result
 
     async def _execute(
-        self,
-        model: str,
-        method: str,
-        args: List = None,
-        kwargs: Dict = None
+        self, model: str, method: str, args: List = None, kwargs: Dict = None
     ) -> Any:
         """Execute a method on an Odoo model
 
@@ -177,15 +174,7 @@ class OdooClient:
         return await self._call(
             service="object",
             method="execute_kw",
-            args=[
-                self.db,
-                self.uid,
-                self.password,
-                model,
-                method,
-                args,
-                kwargs
-            ]
+            args=[self.db, self.uid, self.password, model, method, args, kwargs],
         )
 
     async def _call(self, service: str, method: str, args: List) -> Any:
@@ -207,26 +196,22 @@ class OdooClient:
         payload = {
             "jsonrpc": "2.0",
             "method": "call",
-            "params": {
-                "service": service,
-                "method": method,
-                "args": args
-            },
-            "id": 1
+            "params": {"service": service, "method": method, "args": args},
+            "id": 1,
         }
 
         try:
             response = await self.client.post(
-                url,
-                json=payload,
-                headers={"Content-Type": "application/json"}
+                url, json=payload, headers={"Content-Type": "application/json"}
             )
             response.raise_for_status()
 
             data = response.json()
 
             if "error" in data:
-                error_msg = data["error"].get("data", {}).get("message", str(data["error"]))
+                error_msg = (
+                    data["error"].get("data", {}).get("message", str(data["error"]))
+                )
                 raise Exception(f"Odoo error: {error_msg}")
 
             return data.get("result")

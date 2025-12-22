@@ -19,7 +19,7 @@ class WooCommerceClient:
             consumer_key: WooCommerce API consumer key
             consumer_secret: WooCommerce API consumer secret
         """
-        self.url = url.rstrip('/')
+        self.url = url.rstrip("/")
         self.api_url = f"{self.url}/wp-json/wc/v3"
         self.consumer_key = consumer_key
         self.consumer_secret = consumer_secret
@@ -32,8 +32,8 @@ class WooCommerceClient:
             timeout=30.0,
             headers={
                 "Authorization": f"Basic {encoded}",
-                "Content-Type": "application/json"
-            }
+                "Content-Type": "application/json",
+            },
         )
 
     async def get_orders(
@@ -41,7 +41,7 @@ class WooCommerceClient:
         status: Optional[str] = None,
         per_page: int = 100,
         page: int = 1,
-        after: Optional[str] = None
+        after: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """Get orders from WooCommerce
 
@@ -54,10 +54,7 @@ class WooCommerceClient:
         Returns:
             List of order dictionaries
         """
-        params = {
-            "per_page": min(per_page, 100),
-            "page": page
-        }
+        params = {"per_page": min(per_page, 100), "page": page}
 
         if status:
             params["status"] = status
@@ -100,7 +97,7 @@ class WooCommerceClient:
         per_page: int = 100,
         page: int = 1,
         sku: Optional[str] = None,
-        status: str = "publish"
+        status: str = "publish",
     ) -> List[Dict[str, Any]]:
         """Get products from WooCommerce
 
@@ -113,11 +110,7 @@ class WooCommerceClient:
         Returns:
             List of product dictionaries
         """
-        params = {
-            "per_page": min(per_page, 100),
-            "page": page,
-            "status": status
-        }
+        params = {"per_page": min(per_page, 100), "page": page, "status": status}
 
         if sku:
             params["sku"] = sku
@@ -139,7 +132,9 @@ class WooCommerceClient:
         logger.info(f"Retrieved product {product_id} from WooCommerce")
         return response
 
-    async def update_product(self, product_id: int, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def update_product(
+        self, product_id: int, data: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Update a product
 
         Args:
@@ -153,7 +148,9 @@ class WooCommerceClient:
         logger.info(f"Updated product {product_id} in WooCommerce")
         return response
 
-    async def update_product_stock(self, product_id: int, quantity: int) -> Dict[str, Any]:
+    async def update_product_stock(
+        self, product_id: int, quantity: int
+    ) -> Dict[str, Any]:
         """Update product stock quantity
 
         Args:
@@ -166,15 +163,12 @@ class WooCommerceClient:
         data = {
             "stock_quantity": quantity,
             "manage_stock": True,
-            "stock_status": "instock" if quantity > 0 else "outofstock"
+            "stock_status": "instock" if quantity > 0 else "outofstock",
         }
         return await self.update_product(product_id, data)
 
     async def get_customers(
-        self,
-        per_page: int = 100,
-        page: int = 1,
-        email: Optional[str] = None
+        self, per_page: int = 100, page: int = 1, email: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """Get customers from WooCommerce
 
@@ -186,10 +180,7 @@ class WooCommerceClient:
         Returns:
             List of customer dictionaries
         """
-        params = {
-            "per_page": min(per_page, 100),
-            "page": page
-        }
+        params = {"per_page": min(per_page, 100), "page": page}
 
         if email:
             params["email"] = email
@@ -217,7 +208,7 @@ class WooCommerceClient:
 
         except httpx.HTTPError as e:
             logger.error(f"WooCommerce GET error on {endpoint}: {e}")
-            if hasattr(e, 'response') and e.response is not None:
+            if hasattr(e, "response") and e.response is not None:
                 logger.error(f"Response: {e.response.text}")
             raise
 
@@ -240,7 +231,7 @@ class WooCommerceClient:
 
         except httpx.HTTPError as e:
             logger.error(f"WooCommerce POST error on {endpoint}: {e}")
-            if hasattr(e, 'response') and e.response is not None:
+            if hasattr(e, "response") and e.response is not None:
                 logger.error(f"Response: {e.response.text}")
             raise
 
@@ -263,7 +254,7 @@ class WooCommerceClient:
 
         except httpx.HTTPError as e:
             logger.error(f"WooCommerce PUT error on {endpoint}: {e}")
-            if hasattr(e, 'response') and e.response is not None:
+            if hasattr(e, "response") and e.response is not None:
                 logger.error(f"Response: {e.response.text}")
             raise
 

@@ -7,6 +7,7 @@ from decimal import Decimal
 @dataclass
 class OrderLine:
     """Order line item"""
+
     product_id: int
     product_name: str
     quantity: float
@@ -19,6 +20,7 @@ class OrderLine:
 @dataclass
 class OrderAddress:
     """Shipping/Billing address"""
+
     first_name: str
     last_name: str
     company: Optional[str] = None
@@ -91,7 +93,7 @@ class Order:
             postcode=billing.get("postcode"),
             country=billing.get("country"),
             email=billing.get("email"),
-            phone=billing.get("phone")
+            phone=billing.get("phone"),
         )
 
         # Parse shipping address
@@ -107,7 +109,7 @@ class Order:
                 city=shipping.get("city"),
                 state=shipping.get("state"),
                 postcode=shipping.get("postcode"),
-                country=shipping.get("country")
+                country=shipping.get("country"),
             )
 
         # Parse order lines
@@ -120,7 +122,7 @@ class Order:
                 unit_price=Decimal(str(item.get("price", 0))),
                 total=Decimal(str(item.get("total", 0))),
                 sku=item.get("sku"),
-                tax=Decimal(str(item.get("total_tax", 0)))
+                tax=Decimal(str(item.get("total_tax", 0))),
             )
             lines.append(line)
 
@@ -144,7 +146,7 @@ class Order:
             shipping_address=shipping_address,
             customer_note=woo_order.get("customer_note"),
             payment_method=woo_order.get("payment_method"),
-            payment_method_title=woo_order.get("payment_method_title")
+            payment_method_title=woo_order.get("payment_method_title"),
         )
 
     def to_odoo_values(self) -> dict:
@@ -173,6 +175,6 @@ class Order:
             "processing": "sale",
             "completed": "done",
             "cancelled": "cancel",
-            "refunded": "cancel"
+            "refunded": "cancel",
         }
         return mapping.get(self.status, "draft")
