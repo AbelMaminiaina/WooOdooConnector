@@ -21,9 +21,6 @@ services:
       - ODOO_USERNAME=${ODOO_USERNAME}
       - ODOO_PASSWORD=${ODOO_PASSWORD}
 
-      # Database
-      - DATABASE_URL=postgresql://connector:connector123@db:5432/woo_odoo_connector
-
       # API
       - API_HOST=0.0.0.0
       - API_PORT=8000
@@ -39,29 +36,6 @@ services:
     volumes:
       - ./logs:/app/logs
       - ./src:/app/src  # For development - remove in production
-
-    depends_on:
-      - db
-
-    restart: unless-stopped
-
-    networks:
-      - connector-network
-
-  # PostgreSQL Database
-  db:
-    image: postgres:15-alpine
-    container_name: woo-odoo-db
-    environment:
-      - POSTGRES_DB=woo_odoo_connector
-      - POSTGRES_USER=connector
-      - POSTGRES_PASSWORD=connector123
-
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-    ports:
-      - "5432:5432"
 
     restart: unless-stopped
 
@@ -79,13 +53,9 @@ services:
   #     # Same environment as connector
   #   depends_on:
   #     - connector
-  #     - db
   #   restart: unless-stopped
   #   networks:
   #     - connector-network
-
-volumes:
-  postgres_data:
 
 networks:
   connector-network:
