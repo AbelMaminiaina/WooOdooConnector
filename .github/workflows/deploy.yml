@@ -1,0 +1,74 @@
+name: Deploy
+
+# This workflow is disabled by default.
+# Uncomment the trigger you want to use for deployment.
+
+on:
+  # Trigger on push to main branch
+  # push:
+  #   branches: [ main ]
+
+  # Trigger on new release/tag
+  # release:
+  #   types: [published]
+
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'staging' }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Deploy to server via SSH
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.DEPLOY_HOST }}
+        username: ${{ secrets.DEPLOY_USER }}
+        key: ${{ secrets.DEPLOY_SSH_KEY }}
+        script: |
+          cd /path/to/WooOdooConnector
+          git pull origin main
+          docker-compose pull
+          docker-compose up -d --build
+          docker-compose exec -T connector python -c "print('Deployment successful')"
+
+    # Alternative: Deploy to Docker Swarm
+    # - name: Deploy to Docker Swarm
+    #   uses: appleboy/ssh-action@master
+    #   with:
+    #     host: ${{ secrets.SWARM_MANAGER_HOST }}
+    #     username: ${{ secrets.SWARM_USER }}
+    #     key: ${{ secrets.SWARM_SSH_KEY }}
+    #     script: |
+    #       docker stack deploy -c docker-compose.yml woo-odoo-connector
+
+    # Alternative: Deploy to Kubernetes
+    # - name: Deploy to Kubernetes
+    #   uses: azure/k8s-deploy@v4
+    #   with:
+    #     manifests: |
+    #       k8s/deployment.yml
+    #       k8s/service.yml
+    #     images: |
+    #       ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+    #     kubectl-version: 'latest'
+
+    - name: Notify deployment status
+      if: always()
+      run: |
+        echo "Deployment to ${{ github.event.inputs.environment }} completed"
+        # Add notification logic here (Slack, Discord, Email, etc.)
