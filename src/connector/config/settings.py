@@ -17,7 +17,9 @@ class Settings(BaseSettings):
     odoo_password: str = "admin"
 
     # API
-    api_host: str = "0.0.0.0"  # nosec B104 - Binding to all interfaces is required for Docker
+    api_host: str = (
+        "0.0.0.0"  # nosec B104 - Binding to all interfaces is required for Docker
+    )
     api_port: int = 8000
     api_secret_key: str = "dev-secret-key-change-in-production"
 
