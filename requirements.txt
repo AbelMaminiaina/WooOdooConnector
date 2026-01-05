@@ -9,7 +9,7 @@ httpx==0.28.1
 requests==2.32.3
 
 # Background tasks
-apscheduler==3.10.4
+apscheduler==3.11.2
 
 # Security
 python-dotenv==1.0.1
